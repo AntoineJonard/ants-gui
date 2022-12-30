@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="openjfx">
+    <CLASSES>
+      <root url="file:///opt/javafx-sdk-19/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file:///opt/javafx-sdk-19/lib" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file:///opt/javafx-sdk-19/lib" recursive="false" />
+  </library>
+</component>
