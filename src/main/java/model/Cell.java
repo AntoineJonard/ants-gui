@@ -1,4 +1,5 @@
 package model;
+
 /**
  * This class represent one cell of the ground, one location.
  *
@@ -9,15 +10,15 @@ public class Cell
     /**coordinates of the cell in the ground*/
     private int x,y;
     /** evaporation degree (%)*/
-    static final double evaporation  = 0.05;
+    public static double evaporation  = 0.05;
     /** diffusion degree (%)*/
-    static final double diffusion = 0.004;
+    public static double diffusion = 0.004;
     /** below this threshold, the pheromone is not considered by ants anymore*/
     static final double pheroNulle = 0.4;
     /**pheromones*/
     private double pheromone;
     /**food quantity*/
-    private double food;
+    private int food;
     /**is the cell part of the nest*/
     private boolean nest;
     /**the cell is occupied by an obstacle*/
@@ -33,11 +34,14 @@ public class Cell
     /**cells attributes changed recently*/
     public boolean hasJustChanged;
 
+    private FoodManager fm;
+
     public Cell(){}
 
     /** create a default cell by placing it into the grid*/
-    public Cell(Cell [][] grille, int x, int y)
+    public Cell(Cell [][] grille, int x, int y, FoodManager fm)
     {
+        this.fm = fm;
         Cell.grid = grille;
         this.x = x; this.y = y;
         hasJustChanged = true;
@@ -88,15 +92,28 @@ public class Cell
      */
     void removeFood()
     {
-        food -= Ant.doseFood;
+        fm.takeFood(Math.min(food, Ant.doseFoodCarried));
+        food -= Ant.doseFoodCarried;
         if(food <0){
             food =0;
             emptyNow =true;
         }
         hasJustChanged = true;
-
     }
 
+    /**
+     * @return the food of the cell
+     */
+    public int getFood() {
+        return food;
+    }
+
+    /**
+     * @param food the nourriture to set
+     */
+    public void setFood(int food) {
+        this.food = food;
+    }
 
     /**
      * @return the pheromone
@@ -116,20 +133,6 @@ public class Cell
     public void addPheromone(double pheromone) {
         hasJustChanged = (pheromone==0d);
         this.pheromone += pheromone;
-    }
-
-    /**
-     * @return the food of the cell
-     */
-    public double getFood() {
-        return food;
-    }
-
-    /**
-     * @param food the nourriture to set
-     */
-    public void setFood(double food) {
-        this.food = food;
     }
 
     /**

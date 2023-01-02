@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
 import javafx.scene.shape.Circle;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
-/**A ant which evolve on the ground, looking for food and helped by the pheromones*
+
+/**An ant which evolve on the ground, looking for food and helped by the pheromones*
  *
  * @author Antoine Jonard
  */
@@ -22,10 +23,12 @@ public class Ant {
     /**current number of pheromone the ant can drop (refilling at the nest)*/
     private double  dosePhero;
 
-    /**total dose which can be dropped by an ant before reseting to the nest*/
-    public static final double dosePheroMax = 400d;
-    /**food dose that can be carry by the ant*/
-    public static final double doseFood = 30d;
+    /**total dose which can be dropped by an ant before resetting to the nest*/
+    public static double dosePheroMax = 400d;
+    /** dose of phero dropped when coming back to nest */
+    public static int dosePheroDropped = 11;
+    /**food dose that can be carried by the ant*/
+    public static int doseFoodCarried = 30;
 
     /**Ground where the ant evolve*/
     private Ground ground;
@@ -36,11 +39,15 @@ public class Ant {
     /** direction taken if obstacle encounter */
     private Direction avoidingDirection=null;
 
-    /**random used to determine the next direction of a ant when looking for food*/
+    /**random used to determine the next direction of an ant when looking for food*/
     private Random random;
 
     /**graphical representation of the ant*/
     private Circle antDraw;
+    /** Queue that hold last position to know if ant is turning around */
+    private CircularFifoQueue<Point> lastPositions;
+    /** number of turns **/
+    private int turns;
 
     public Ant(){}
 
@@ -51,6 +58,8 @@ public class Ant {
      */
     public Ant(int _x, int _y, Ground _ground)
     {
+        turns = 0;
+        lastPositions = new CircularFifoQueue<>(100);
         p = new Point(_x, _y);
         ground =_ground;
         groundSize = ground.getSize();
@@ -83,7 +92,7 @@ public class Ant {
             case COMMING_BACK:
                 if(dosePhero>0) {
                     grille[x][y].addPheromone(dosePhero); // drop pheromone and decrease the quantity it can drop
-                    dosePhero-=11;
+                    dosePhero-= dosePheroDropped;
                 }
                 direction = getBestDirectionNest(); // search direction to the nest
                 move();
@@ -91,11 +100,11 @@ public class Ant {
                     state = AntState.RESET;
                 break;
             case RESET:
-                dosePhero = Ant.dosePheroMax; // la fourmi regenere sa dose de pheromone
-                direction = Direction.getInverse(direction); //la fourmi fait demi-tour
-                direction = getBestDirection();// recherche la meilleure direction
-                move();// et avance
-                state = AntState.SEARCHING; // elle passe a l'état suivant
+                dosePhero = Ant.dosePheroMax; // reset pheromone dose
+                direction = Direction.getInverse(direction); // the ant goes back to searching
+                direction = getBestDirection();// search the best direction
+                move();// and move
+                state = AntState.SEARCHING; // next state : SEARCHING
                 break;
         }
     }
@@ -144,12 +153,12 @@ public class Ant {
     }
 
     /**
-     * Decide where the ant can go with all of the data. If the ant can access the cell in the best direction everything
-     * goes well, otherwise a new direction is choosen to get around the obstacle.
+     * Decide where the ant can go with all the data. If the ant can access the cell in the best direction everything
+     * goes well, otherwise a new direction is chosen to get around the obstacle.
      * @param bestDirection the best possible direction according to phero/nest odor/food odor
      * @param bestValue the value of the best direction
      * @param dirAround the direction around
-     * @return the computed best direction => final choice of direction for the iteration
+     * @return the best direction computed => final choice of direction for the iteration
      */
     private Direction getDirection(Direction bestDirection, double bestValue, Direction[] dirAround) {
         if(bestValue==0) //no best direction
@@ -188,7 +197,7 @@ public class Ant {
                 dir2 = nextCell2 != null && nextCell2.isAccessible()?nextDirection:null;
             }
             if (avoidingDirection == null) {
-                // Choose a random direction to avoir the obstacle according to pheromone dose in both direction
+                // Choose a random direction to avoid the obstacle according to pheromone dose in both direction
                 double phero1 = nextCell1.getPheromone();
                 double phero2 = nextCell2.getPheromone();
                 double randomValue = Math.random()*(phero1+phero2);
@@ -208,14 +217,14 @@ public class Ant {
      * @return list of possible directions*/
     private ArrayList<Direction> possibleNextDirections(Direction []directions)
     {
-        ArrayList<Direction> liste = new ArrayList<>();
+        ArrayList<Direction> possibleNextDirections = new ArrayList<>();
         for(Direction dir:directions)
         {
             Cell cell = getNextCell(dir);
             if(cell != null && cell.isAccessible())
-                liste.add(dir);
+                possibleNextDirections.add(dir);
         }
-        return liste;
+        return possibleNextDirections;
     }
 
 
@@ -225,10 +234,17 @@ public class Ant {
         Cell cell = getNextCell(direction);
         if(cell!=null)
         {
+            if (lastPositions.contains(p)){
+                turns++;
+                lastPositions.clear();
+            }
+            lastPositions.add(p);
             p.x = cell.getX();
             p.y = cell.getY();
-            antDraw.setCenterX((p.x+1) * step);
-            antDraw.setCenterY((p.y+2) * step);
+            if (antDraw != null){
+                antDraw.setCenterX((p.x+1) * step);
+                antDraw.setCenterY((p.y+2) * step);
+            }
         }
     }
 
@@ -296,4 +312,7 @@ public class Ant {
         this.step = step;
     }
 
+    public int getTurns() {
+        return turns;
+    }
 }

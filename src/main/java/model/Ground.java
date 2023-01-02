@@ -1,5 +1,6 @@
 package model;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -26,6 +27,8 @@ public class Ground {
     /** y coordinate of the nest */
     private int yNest;
 
+    private FoodManager fm;
+
     public Ground()
     {
         grid = new  Cell[20][20];
@@ -33,8 +36,9 @@ public class Ground {
     }
 
     /** intialize ground attributes : instantiate cells, obstacles, nest, food, ants*/
-    public Ground(int taille, int _nbFourmis)
+    public Ground(int taille, int _nbFourmis, FoodManager fm)
     {
+        this.fm = fm;
         this.size = taille;
         grid = new Cell[taille][taille];
         this.antsNumber = _nbFourmis ;
@@ -54,7 +58,7 @@ public class Ground {
     {
         for(int i = 0; i< size; i++)
             for(int j = 0; j< size; j++)
-                grid[i][j] = new Cell(grid, i, j);
+                grid[i][j] = new Cell(grid, i, j, fm);
     }
 
 
@@ -63,11 +67,11 @@ public class Ground {
      */
     private void initFood()
     {
-        setFood((size) / 9, size / 9, 3, 50d);
-        setFood((9* size) / 10, size / 9, 3, 50d);
-        setFood((size) / 10, size / 2, 3, 50d);
-        setFood((8* size) / 9, (3* size) / 4, 5, 20d);
-        setFood((size) / 9, (8* size) / 9, 4, 30d);
+        setFood((size) / 9, size / 9, 3);
+        setFood((9* size) / 10, size / 9, 3);
+        setFood((size) / 10, size / 2, 3);
+        setFood((8* size) / 9, (3* size) / 4, 5);
+        setFood((size) / 9, (8* size) / 9, 4);
     }
 
 
@@ -75,8 +79,8 @@ public class Ground {
      * @param xMeat x coordinate of the center of the food zone
      * @param yMeat y coordinate of the center of the food zone
      * @param zoneSize size of the food zone
-     * @param foodDose food dosing*/
-    private void setFood(int xMeat, int yMeat, int zoneSize, double foodDose)
+     */
+    private void setFood(int xMeat, int yMeat, int zoneSize)
     {
         for(int i=-zoneSize; i<=zoneSize; i++)
         {
@@ -85,7 +89,7 @@ public class Ground {
             {
                 int yy = (yMeat + j + size) % size;
                 if((Math.abs(i)+Math.abs(j))<=zoneSize)
-                    grid[xx][yy].setFood(foodDose);
+                    grid[xx][yy].setFood(fm.putFood());
             }
         }
     }
@@ -126,8 +130,8 @@ public class Ground {
     }
 
     private void initObstacles() {
+        Random random = new Random(666);
         for (int i = 0 ; i < nbObstacles ; i++){
-            Random random = new Random();
             int startX = random.nextInt(size);
             int startY = random.nextInt(size);
 
@@ -167,6 +171,14 @@ public class Ground {
         for(int i = 0; i< size; i++)
             for(int j = 0; j< size; j++)
                 grid[i][j].evaporate();
+    }
+
+    /**
+     * Compute the total number of turns from all ants of the simulation
+     * @return total number of turns
+     */
+    public int getNbAntsTurns(){
+        return Arrays.stream(ants).mapToInt(Ant::getTurns).sum();
     }
 
     /**

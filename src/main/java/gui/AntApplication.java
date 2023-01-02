@@ -14,11 +14,12 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import model.FoodManager;
 
 /**
  * interesting : <a href="https://twitter.com/fasc1nate/status/1590870089947303937">ant swarm without nest</a>
  *
- * Graphical JFX interface to represent a ant colony looking for food
+ * Graphical JFX interface to represent an ant colony looking for food
  *
  * @author Antoine Jonard
  */
@@ -27,8 +28,10 @@ public class AntApplication extends Application {
     private Ground ground;
     /** number of ants */
     int antsNumber = 40;
+    /** allow access to food evolution during simulation */
+    private FoodManager foodManager;
     /** simulation speed */
-    double tempo = 50;
+    double tempo = 20;
     /** size of the ground */
     private int size;
     /** pixel size of a cell */
@@ -36,6 +39,10 @@ public class AntApplication extends Application {
     private  static Rectangle [][] environment;
     public static Circle[]fourmis;
 
+    /** main (entry point of the Application) */
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     /**
      * Launch the graphical interface
@@ -44,8 +51,9 @@ public class AntApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         int tailleTerrain = 70;
+        foodManager = new FoodManager();
         fourmis = new Circle[antsNumber];
-        ground = new Ground(tailleTerrain, antsNumber);
+        ground = new Ground(tailleTerrain, antsNumber, foodManager);
         size = ground.getSize();
         sceneConstructionForAnts( primaryStage);
 
@@ -60,21 +68,28 @@ public class AntApplication extends Application {
         Scene scene = new Scene(root, 2*espace + size *espace, 2*espace + size *espace, Color.BLACK);
         primaryStage.setTitle("Ants searching food for the nest");
         primaryStage.setScene(scene);
-        AntApplication.environment = new Rectangle[size][size];
-        drawEnvironment(root);
 
         // Display the stage
         primaryStage.show();
 
+        startGraphicalSimulation(root);
+    }
+
+    private void startGraphicalSimulation(Group root) {
+        AntApplication.environment = new Rectangle[size][size];
+        drawEnvironment(root);
+
         //launch the timer to make every element evolve at each tempo tick
         Timeline littleCycle = new Timeline(new KeyFrame(Duration.millis(tempo), event -> {
-            ground.animGrid();
-            updateGround();
+            if (foodManager.stillFood()){
+                ground.animGrid();
+                updateGround();
+            }
         }));
         littleCycle.setCycleCount(Timeline.INDEFINITE);
         littleCycle.play();
-    }
 
+    }
 
 
     /**
@@ -160,7 +175,7 @@ public class AntApplication extends Application {
                 if (cell.hasJustChanged && cell.getFood()>0 && cell.isAccessible())
                 {
                     Color colNouriture = Color.DARKGOLDENROD;
-                    double ratio = cell.getFood() / 50d;
+                    double ratio = cell.getFood() /(double) FoodManager.foodDose;
                     colNouriture = colNouriture.interpolate(Color.BISQUE, ratio);
                     AntApplication.environment[i][j].setFill(colNouriture);
                 }
@@ -188,11 +203,5 @@ public class AntApplication extends Application {
                     AntApplication.environment[i][j].setFill(Color.RED);
                 }
             }
-    }
-
-
-    /** main (entry point of the Application) */
-    public static void main(String[] args) {
-        launch(args);
     }
 }
