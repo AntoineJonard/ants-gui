@@ -24,9 +24,9 @@ public class Ant {
     private double  dosePhero;
 
     /**total dose which can be dropped by an ant before resetting to the nest*/
-    public static double dosePheroMax = 400d;
+    public static double dosePheroMax = 900d;
     /** dose of phero dropped when coming back to nest */
-    public static int dosePheroDropped = 11;
+    public static int dosePheroDropped = 15;
     /**food dose that can be carried by the ant*/
     public static int doseFoodCarried = 30;
 
@@ -84,6 +84,7 @@ public class Ant {
                     state = AntState.TAKING;
                 break;
             case TAKING:
+                lastPositions.clear();
                 grille[x][y].removeFood();// take a dose of food
                 direction = Direction.getInverse(direction);// come back
                 move();
@@ -92,7 +93,7 @@ public class Ant {
             case COMMING_BACK:
                 if(dosePhero>0) {
                     grille[x][y].addPheromone(dosePhero); // drop pheromone and decrease the quantity it can drop
-                    dosePhero-= dosePheroDropped;
+                    dosePhero-=Ant.dosePheroDropped;
                 }
                 direction = getBestDirectionNest(); // search direction to the nest
                 move();
@@ -100,6 +101,7 @@ public class Ant {
                     state = AntState.RESET;
                 break;
             case RESET:
+                lastPositions.clear();
                 dosePhero = Ant.dosePheroMax; // reset pheromone dose
                 direction = Direction.getInverse(direction); // the ant goes back to searching
                 direction = getBestDirection();// search the best direction
@@ -234,11 +236,13 @@ public class Ant {
         Cell cell = getNextCell(direction);
         if(cell!=null)
         {
-            if (lastPositions.contains(p)){
-                turns++;
-                lastPositions.clear();
+            if (ground.getGrid()[p.x][p.y].isPheromone()){
+                if (lastPositions.contains(p)){
+                    turns++;
+                    lastPositions.clear();
+                }
+                lastPositions.add(p);
             }
-            lastPositions.add(p);
             p.x = cell.getX();
             p.y = cell.getY();
             if (antDraw != null){
@@ -268,7 +272,9 @@ public class Ant {
     {
         double food = -1;
         Cell cell = getNextCell(dir);
-        if(cell != null)food = cell.getFood();
+        for (int i = 0 ; i < 4 && cell != null; i++, cell = cell.getNextCell(dir)){
+            food += cell.getFood();
+        }
         return food;
     }
 

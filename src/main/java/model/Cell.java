@@ -1,5 +1,7 @@
 package model;
 
+import java.awt.*;
+
 /**
  * This class represent one cell of the ground, one location.
  *
@@ -10,11 +12,11 @@ public class Cell
     /**coordinates of the cell in the ground*/
     private int x,y;
     /** evaporation degree (%)*/
-    public static double evaporation  = 0.05;
+    public static double evaporation  = 0.055;
     /** diffusion degree (%)*/
-    public static double diffusion = 0.004;
+    public static double diffusion = 0.003;
     /** below this threshold, the pheromone is not considered by ants anymore*/
-    static final double pheroNulle = 0.4;
+    static final double pheroNulle = 5;
     /**pheromones*/
     private double pheromone;
     /**food quantity*/
@@ -82,9 +84,13 @@ public class Cell
         if (pheromone!=0)
         {
             pheromone = pheromone * (1d - Cell.evaporation);
-            if (pheromone<=Cell.pheroNulle) pheromone = 0;
+            if (!isPheromone()) pheromone = 0;
             hasJustChanged = true;
         }
+    }
+
+    public boolean isPheromone() {
+        return pheromone >= Cell.pheroNulle;
     }
 
     /**
@@ -133,6 +139,16 @@ public class Cell
     public void addPheromone(double pheromone) {
         hasJustChanged = (pheromone==0d);
         this.pheromone += pheromone;
+    }
+
+    public Cell getNextCell(Direction dir){
+        Cell cell = null;
+        Point newPoint = Direction.getNextPoint(new Point(x,y), dir);
+        if ((newPoint.x>=0 && newPoint.x < grid.length) && (newPoint.y>=0 && newPoint.y< grid.length))
+        {
+            cell = grid[newPoint.x][newPoint.y];
+        }
+        return cell;
     }
 
     /**

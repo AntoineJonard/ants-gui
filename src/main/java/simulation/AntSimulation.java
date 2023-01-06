@@ -12,22 +12,25 @@ import java.util.ArrayList;
 
 public class AntSimulation {
 
-    private final static int NB_TEST = 3;
-    private final static int NB_SAMPLE = 1;
+    private final static int NB_TEST = 30;
+    private final static int NB_SAMPLE = 40;
 
     public static void main(String[] args) throws PythonExecutionException, IOException {
 
         /*
          * Testing ant's pheromones doses impact on time and number of turns
          */
+
         ArrayList<Double> times = new ArrayList<>();
         ArrayList<Double> nbTurns = new ArrayList<>();
         ArrayList<Double> pheroRatios = new ArrayList<>();
+        ArrayList<Double> nbIterationAvg = new ArrayList<>();
         resetVariables();
 
+        /*
         for (int i = 0; i < NB_TEST; i++){
 
-            simulateSamples(times, nbTurns, i);
+            nbIterationAvg.add(simulateSamples(times, nbTurns, i));
 
             pheroRatios.add(Ant.dosePheroDropped/Ant.dosePheroMax);
 
@@ -39,33 +42,43 @@ public class AntSimulation {
         plotStats(
                 pheroRatios,
                 nbTurns,
-                "Pheromones droped/max ratio",
+                "Pheromones dropped/max ratio",
                 "Number of ant turns",
-                "Pheromones doses impact on number of truns"
+                "Pheromones doses impact on death circle"
         );
 
         plotStats(
                 pheroRatios,
                 times,
                 "Pheromones dropped/max ratio",
-                "time to get all the food to nest",
+                "time to get all the food to nest (ms)",
                 "Pheromone dose impact on finishing time"
+        );
+
+        plotStats(
+                pheroRatios,
+                nbIterationAvg,
+                "Pheromones dropped/max ratio",
+                "Number of iteration to get all the food",
+                "Pheromone dose impact on algorithm speed"
         );
 
         /*
          * Testing pheromones' evaporation impact on time and number of turns
          */
+        /*
         times.clear();
         nbTurns.clear();
+        nbIterationAvg.clear();
         ArrayList<Double> evaporation = new ArrayList<>();
         resetVariables();
 
         for (int i = 0; i < NB_TEST; i++){
 
-            simulateSamples(times, nbTurns, i);
+            nbIterationAvg.add(simulateSamples(times, nbTurns, i));
             evaporation.add(Cell.evaporation);
 
-            Cell.evaporation+=0.025;
+            Cell.evaporation+=0.0025;
         }
 
         plotStats(
@@ -80,21 +93,31 @@ public class AntSimulation {
                 evaporation,
                 times,
                 "Evaporation (%)",
-                "time to get all the food to nest",
+                "time to get all the food to nest (ms)",
                 "Evaporation impact finishing time"
         );
+
+        plotStats(
+                evaporation,
+                nbIterationAvg,
+                "Evaporation (%)",
+                "Number of iteration to get all the food",
+                "Evaporation impact on algorithm speed"
+        );
+         */
 
         /*
          * Testing pheromones' diffusion impact on time and number of turns
          */
         times.clear();
         nbTurns.clear();
+        nbIterationAvg.clear();
         ArrayList<Double> diffusion = new ArrayList<>();
         resetVariables();
 
-        for (int i = 0; i < NB_TEST; i++){
+        for (int i = 0; i < NB_TEST && Cell.diffusion <= 0.004; i++){
 
-            simulateSamples(times, nbTurns, i);
+            nbIterationAvg.add(simulateSamples(times, nbTurns, i));
             diffusion.add(Cell.diffusion);
 
             Cell.diffusion+=0.00025;
@@ -112,8 +135,16 @@ public class AntSimulation {
                 diffusion,
                 times,
                 "Diffusion (%)",
-                "time to get all the food to nest",
-                "Diffusion impact finishing time"
+                "time to get all the food to nest (ms)",
+                "Diffusion impact on finishing time"
+        );
+
+        plotStats(
+                diffusion,
+                nbIterationAvg,
+                "Diffusion (%)",
+                "Number of iteration to get all the food",
+                "Diffusion impact on algorithm speed"
         );
 
 
@@ -122,16 +153,17 @@ public class AntSimulation {
          */
         times.clear();
         nbTurns.clear();
+        nbIterationAvg.clear();
         ArrayList<Double> evDiffScale = new ArrayList<>();
         resetVariables();
 
         for (int i = 0; i < NB_TEST; i++){
 
-            simulateSamples(times, nbTurns, i);
+            nbIterationAvg.add(simulateSamples(times, nbTurns, i));
             evDiffScale.add((double)i);
 
             Cell.diffusion+=0.00025;
-            Cell.evaporation+=0.025;
+            Cell.evaporation+=0.0025;
         }
 
         plotStats(
@@ -148,6 +180,14 @@ public class AntSimulation {
                 "Diffusion/Evaporation incrementation",
                 "time to get all the food to nest",
                 "Diffusion/Evaporation pair impact on finishing time"
+        );
+
+        plotStats(
+                evDiffScale,
+                nbIterationAvg,
+                "Diffusion/Evaporation incrementation",
+                "Number of iteration to get all the food",
+                "Diffusion/Evaporation impact on algorithm speed"
         );
 
     }
@@ -169,8 +209,10 @@ public class AntSimulation {
         }
     }
 
-    private static void simulateSamples(ArrayList<Double> stat1list, ArrayList<Double> stat2list, int testindex) {
+    private static double simulateSamples(ArrayList<Double> stat1list, ArrayList<Double> stat2list, int testindex) {
         System.out.println("Starting test "+(testindex+1));
+
+        double nbIteration = 0;
 
         double timeAvg = 0;
         double nbTurnsAvg = 0;
@@ -188,6 +230,7 @@ public class AntSimulation {
 
             while (foodManager.stillFood()){
                 ground.animGrid();
+                nbIteration++;
             }
 
             Long endTime = System.currentTimeMillis();
@@ -200,13 +243,15 @@ public class AntSimulation {
         stat1list.add(timeAvg);
         nbTurnsAvg /= AntSimulation.NB_SAMPLE;
         stat2list.add(nbTurnsAvg);
+
+        return nbIteration/AntSimulation.NB_SAMPLE;
     }
 
     private static void resetVariables() {
         Ant.dosePheroMax = 400;
-        Ant.dosePheroDropped = 10;
-        Cell.diffusion = 0.004;
-        Cell.evaporation = 0.5;
+        Ant.dosePheroDropped = 6;
+        Cell.diffusion = 0.0025;
+        Cell.evaporation = 0.035;
     }
 
 }

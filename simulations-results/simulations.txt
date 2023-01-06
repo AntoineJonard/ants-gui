@@ -1,0 +1,6 @@
+1 = test 
+2 = n'importe quelle cell peut entrainer un tour + pas de reset sur les etats
+3 = cell doit avoir phero + reset sur les changements d'états
+4 = reset sur les changements d'états
+5 = apres radar sur fourmis + cell doit avoir phero + reset sur les changements d'états
+6 = apres radar sur fourmis + reset sur les changements d'états
