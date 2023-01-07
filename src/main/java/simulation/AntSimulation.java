@@ -17,6 +17,60 @@ public class AntSimulation {
 
     public static void main(String[] args) throws PythonExecutionException, IOException {
 
+        //testGen1();
+        testGen2();
+
+    }
+
+    private static void testGen2(){
+        /*
+         * Testing ant's pheromones doses impact on time and number of turns
+         */
+
+        ArrayList<Double> times = new ArrayList<>();
+        ArrayList<Double> nbTurns = new ArrayList<>();
+        ArrayList<Double> nbIterationAvg = new ArrayList<>();
+
+        ArrayList<Integer> noPheroThresholds = new ArrayList<>();
+
+        Cell.pheroNullExponent = 35;
+
+        for (int i = 0; i < NB_TEST; i++){
+
+            nbIterationAvg.add(simulateSamples(times, nbTurns, i));
+
+            noPheroThresholds.add(Cell.pheroNullExponent);
+
+            Cell.pheroNullExponent++;
+        }
+
+
+        plotStats(
+                noPheroThresholds,
+                nbTurns,
+                "Pheromone threshold",
+                "Number of ant turns",
+                "Pheromone threshold impact on death circle"
+        );
+
+        plotStats(
+                noPheroThresholds,
+                times,
+                "Pheromone threshold",
+                "time to get all the food to nest (ms)",
+                "Pheromone threshold impact on finishing time"
+        );
+
+        plotStats(
+                noPheroThresholds,
+                nbIterationAvg,
+                "Pheromones dropped/max ratio",
+                "Number of iteration to get all the food",
+                "Pheromone dose impact on algorithm speed"
+        );
+    }
+
+    private static void testGen1() {
         /*
          * Testing ant's pheromones doses impact on time and number of turns
          */
@@ -27,7 +81,6 @@ public class AntSimulation {
         ArrayList<Double> nbIterationAvg = new ArrayList<>();
         resetVariables();
 
-        /*
         for (int i = 0; i < NB_TEST; i++){
 
             nbIterationAvg.add(simulateSamples(times, nbTurns, i));
@@ -66,7 +119,6 @@ public class AntSimulation {
         /*
          * Testing pheromones' evaporation impact on time and number of turns
          */
-        /*
         times.clear();
         nbTurns.clear();
         nbIterationAvg.clear();
@@ -104,7 +156,6 @@ public class AntSimulation {
                 "Number of iteration to get all the food",
                 "Evaporation impact on algorithm speed"
         );
-         */
 
         /*
          * Testing pheromones' diffusion impact on time and number of turns
@@ -189,10 +240,9 @@ public class AntSimulation {
                 "Number of iteration to get all the food",
                 "Diffusion/Evaporation impact on algorithm speed"
         );
-
     }
 
-    private static void plotStats(ArrayList<Double> xlist,ArrayList<Double> ylist, String xlabel,String ylabel,String title) {
+    private static void plotStats(ArrayList<? extends Number> xlist,ArrayList<? extends Number> ylist, String xlabel,String ylabel,String title) {
         Plot plt = Plot.create();
         plt.plot()
                 .add(xlist, ylist)
@@ -252,6 +302,7 @@ public class AntSimulation {
         Ant.dosePheroDropped = 6;
         Cell.diffusion = 0.0025;
         Cell.evaporation = 0.035;
+        Cell.pheroNullExponent = 20;
     }
 
 }

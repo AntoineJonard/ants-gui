@@ -12,11 +12,11 @@ public class Cell
     /**coordinates of the cell in the ground*/
     private int x,y;
     /** evaporation degree (%)*/
-    public static double evaporation  = 0.055;
+    public static double evaporation  = 0.25;
     /** diffusion degree (%)*/
-    public static double diffusion = 0.003;
+    public static double diffusion = 0.0026;
     /** below this threshold, the pheromone is not considered by ants anymore*/
-    static final double pheroNulle = 5;
+    public static int pheroNullExponent = 55;
     /**pheromones*/
     private double pheromone;
     /**food quantity*/
@@ -90,7 +90,7 @@ public class Cell
     }
 
     public boolean isPheromone() {
-        return pheromone >= Cell.pheroNulle;
+        return pheromone >= Math.pow(2,-pheroNullExponent);
     }
 
     /**

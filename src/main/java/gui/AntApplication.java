@@ -193,6 +193,8 @@ public class AntApplication extends Application {
                     Color c1 = Color.DARKGREEN;
                     Color c = c1.interpolate(Color.rgb(g,g,g), transparence);
                     AntApplication.environment[i][j].setFill(c);
+                    if (cell.isPheromone())
+                        AntApplication.environment[i][j].setFill(Color.WHITE);
                 }
                 if (cell.hasJustChanged && cell.getPheromone()==0 && cell.getFood()==0 && cell.isAccessible())
                 {

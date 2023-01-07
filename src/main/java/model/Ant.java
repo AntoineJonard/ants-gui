@@ -93,7 +93,7 @@ public class Ant {
             case COMMING_BACK:
                 if(dosePhero>0) {
                     grille[x][y].addPheromone(dosePhero); // drop pheromone and decrease the quantity it can drop
-                    dosePhero-=Ant.dosePheroDropped;
+                    dosePhero/=2;
                 }
                 direction = getBestDirectionNest(); // search direction to the nest
                 move();
