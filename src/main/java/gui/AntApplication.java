@@ -186,15 +186,13 @@ public class AntApplication extends Application {
                 }
                 if (cell.hasJustChanged && cell.getPheromone()>0 && cell.getFood()==0  && !cell.isNest() && cell.isAccessible()) // s'il y a une trace de phéromone
                 {
-                    double ratio = (cell.getPheromone() / pheroMaxAtm );
-                    int g = (int)(ratio* 255*10) +100;
+                    double ratio = (Math.log(cell.getPheromone()+1) / Math.log(pheroMaxAtm+1));
+                    int g = (int)(ratio * 255*10) + 150;
                     if(g>255) g=255;
                     float transparence = (float)ratio + 0.2f; if (transparence>1f) transparence = 1f;
                     Color c1 = Color.DARKGREEN;
                     Color c = c1.interpolate(Color.rgb(g,g,g), transparence);
                     AntApplication.environment[i][j].setFill(c);
-                    if (cell.isPheromone())
-                        AntApplication.environment[i][j].setFill(Color.WHITE);
                 }
                 if (cell.hasJustChanged && cell.getPheromone()==0 && cell.getFood()==0 && cell.isAccessible())
                 {

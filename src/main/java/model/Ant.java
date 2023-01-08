@@ -204,7 +204,7 @@ public class Ant {
                 double phero2 = nextCell2.getPheromone();
                 double randomValue = Math.random()*(phero1+phero2);
                 // Give a chance to explore instead of follow pheromones
-                avoidingDirection = new Random().nextInt(10) <=3 ? randomValue > phero1 ? dir1:dir2 : randomValue < phero1 ? dir1:dir2;
+                avoidingDirection = new Random().nextInt(10) <= 3 ? randomValue > phero1 ? dir1:dir2 : randomValue < phero1 ? dir1:dir2;
             }
             bestDirection = avoidingDirection;
         }else {
@@ -236,13 +236,13 @@ public class Ant {
         Cell cell = getNextCell(direction);
         if(cell!=null)
         {
-            if (ground.getGrid()[p.x][p.y].isPheromone()){
+            //if (ground.getGrid()[p.x][p.y].isPheromone()){
                 if (lastPositions.contains(p)){
                     turns++;
                     lastPositions.clear();
                 }
                 lastPositions.add(p);
-            }
+            //}
             p.x = cell.getX();
             p.y = cell.getY();
             if (antDraw != null){

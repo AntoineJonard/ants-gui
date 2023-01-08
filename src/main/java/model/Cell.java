@@ -12,11 +12,11 @@ public class Cell
     /**coordinates of the cell in the ground*/
     private int x,y;
     /** evaporation degree (%)*/
-    public static double evaporation  = 0.25;
+    public static double evaporation  = 0.3;
     /** diffusion degree (%)*/
-    public static double diffusion = 0.0026;
+    public static double diffusion = 0.0035;
     /** below this threshold, the pheromone is not considered by ants anymore*/
-    public static int pheroNullExponent = 55;
+    public static int pheroNullExponent = 56;
     /**pheromones*/
     private double pheromone;
     /**food quantity*/
