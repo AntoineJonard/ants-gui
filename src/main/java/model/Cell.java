@@ -14,7 +14,7 @@ public class Cell
     /** evaporation degree (%)*/
     public static double evaporation  = 0.3;
     /** diffusion degree (%)*/
-    public static double diffusion = 0.0035;
+    public static double diffusion = 0.0015;
     /** below this threshold, the pheromone is not considered by ants anymore*/
     public static int pheroNullExponent = 56;
     /**pheromones*/

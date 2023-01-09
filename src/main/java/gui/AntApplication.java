@@ -189,7 +189,7 @@ public class AntApplication extends Application {
                     double ratio = (Math.log(cell.getPheromone()+1) / Math.log(pheroMaxAtm+1));
                     int g = (int)(ratio * 255*10) + 150;
                     if(g>255) g=255;
-                    float transparence = (float)ratio + 0.2f; if (transparence>1f) transparence = 1f;
+                    float transparence = (float)ratio + 0.4f; if (transparence>1f) transparence = 1f;
                     Color c1 = Color.DARKGREEN;
                     Color c = c1.interpolate(Color.rgb(g,g,g), transparence);
                     AntApplication.environment[i][j].setFill(c);
