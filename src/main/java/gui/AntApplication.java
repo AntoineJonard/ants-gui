@@ -16,6 +16,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.FoodManager;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * interesting : <a href="https://twitter.com/fasc1nate/status/1590870089947303937">ant swarm without nest</a>
  *
@@ -79,11 +81,22 @@ public class AntApplication extends Application {
         AntApplication.environment = new Rectangle[size][size];
         drawEnvironment(root);
 
+        AtomicInteger nbIterations = new AtomicInteger();
+
         //launch the timer to make every element evolve at each tempo tick
         Timeline littleCycle = new Timeline(new KeyFrame(Duration.millis(tempo), event -> {
             if (foodManager.stillFood()){
                 ground.animGrid();
                 updateGround();
+                nbIterations.getAndIncrement();
+            }else {
+                System.out.println("Number of ant turns: "+ground.getNbAntsTurns());
+                System.out.println("Number of iterations: "+nbIterations);
+                try {
+                    this.stop();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }));
         littleCycle.setCycleCount(Timeline.INDEFINITE);
